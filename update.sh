@@ -63,7 +63,7 @@ do
                             rm -r /var/www/html/Proxy007Bot/
                             colorized_echo green "\nВсе файлы и папки удалены для обновления бота. . .\n"
 
-                            git clone https://github.com/osiblack/Proxy007.git /var/www/html/Proxy007Bot/
+                            git clone https://github.com/kaspernux/PROXYRU.git /var/www/html/Proxy007Bot/
                             sudo chmod -R 777 /var/www/html/Proxy007Bot/
                             mv /var/www/html/kaspernux.install /var/www/html/Proxy007Bot/install/kaspernux.install
                             sleep 2

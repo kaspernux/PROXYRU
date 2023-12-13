@@ -94,7 +94,7 @@ sudo systemctl start apache2
 ufw allow 'Apache Full'
 sudo systemctl restart apache2
 
-colorized_echo green "Установка PROXY007 . . ."
+colorized_echo green "Установка PROXYRU . . ."
 
 sleep 2
 
@@ -111,9 +111,9 @@ sudo systemctl restart apache2.service
 
 wait
 
-git clone https://github.com/Proxy007/Proxy007.git /var/www/html/Proxy007Bot
-sudo chmod -R 777 /var/www/html/Proxy007Bot/
-colorized_echo green "\n\tВсе файлы/папки робота Proxy007 успешно установлены на вашем сервере!"
+git clone https://github.com/kaspernux/PROXYRU.git /var/www/html/PROXYRUBot
+sudo chmod -R 777 /var/www/html/PROXURUBot/
+colorized_echo green "\n\tВсе файлы/папки робота PROXYRU успешно установлены на вашем сервере!"
 
 wait
 

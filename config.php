@@ -209,7 +209,7 @@ function joinSend($from_id){
         }
     }
     if (count($buttons) > 0) {
-        $buttons[] = [['text' => "عضو شدم ✅", 'callback_data' => 'join']];
+        $buttons[] = [['text' => "Я стал участником ✅", 'callback_data' => 'join']];
         sendmessage($from_id, $texts['send_join'], json_encode(['inline_keyboard' => $buttons]));
     }
 }
@@ -234,16 +234,15 @@ function RubPayGenerator($project_id, $amount, $order_id, $sign2, $user_code, $u
     $query_string = http_build_query($data);
 
     // URL for the request
-    $url = 'https://proxy007.io/pay/create?' . $query_string; // Replace 'yourdomain.com' with the actual domain
+    $url = 'https://rubpay.io/pay/create?' . $query_string; // Replace 'yourdomain.com' with the actual domain
 
     return $url;
 }
 
 function CheckRubpay($project_id, $order_id) {
-    $api_key = 'YOUR_API_KEY'; // Replace 'YOUR_API_KEY' with your actual API key
-    global $payment_setting;
+	global $payment_setting, $config;
 
-    $url = 'https://proxy007.io/pay/status'; // Replace 'yourdomain.com' with the actual domain
+    $url = 'https://rubpay.io/pay/status'; // Replace 'yourdomain.com' with the actual domain
 
     // Prepare data for the request
     $data = array(
@@ -648,8 +647,10 @@ $manage_payment = json_encode(['keyboard' => [
 ], 'resize_keyboard' => true]);
 
 $manage_off_on_paymanet = json_encode(['inline_keyboard' => [
-    [['text' => ($payment_setting['rubpay_status'] == 'active') ? '🟢' : '🔴', 'callback_data' => 'change_status_rubpay'], ['text' => '▫️Заринпал :', 'callback_data' => 'null']],
+    [['text' => ($payment_setting['rubpay_status'] == 'active') ? '🟢' : '🔴', 'callback_data' => 'change_status_rubpay'], ['text' => '💳 RUB:', 'callback_data' => 'null']],
     [['text' => ($payment_setting['nowpayment_status'] == 'active') ? '🟢' : '🔴', 'callback_data' => 'change_status_nowpayment'], ['text' => ': nowpayment ▫️', 'callback_data' => 'null']],
+    [['text' => ($payment_setting['card_status'] == 'active') ? '🟢' : '🔴', 'callback_data' => 'change_status_card'], ['text' => '▫ QIWI:', 'callback_data' => 'null']]
+
 ]]);
 
 

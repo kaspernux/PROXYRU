@@ -751,7 +751,7 @@ elseif (strpos($data, 'checkpayment') !== false) {
 }
 
 elseif ($data == 'QIWI') {
-	if ($payment_setting['QIWI_status'] == 'active') {
+	if ($payment_setting['card_status'] == 'active') {
 	    $price = explode('-', $user['step'])[1];
 	    step('send_fish-'.$price);
 	    $code = rand(11111111, 99999999);
@@ -2331,7 +2331,7 @@ elseif ($data == 'change_status_auth_all_country') {
             $sql->query("UPDATE `payment_setting` SET `rubpay_status` = 'active'");
         }
         $manage_off_on_paymanet = json_encode(['inline_keyboard' => [
-            [['text' => ($status == 'inactive') ? '🟢' : '🔴', 'callback_data' => 'change_status_rubpay'], ['text' => '▫️Заринпал :', 'callback_data' => 'null']],
+            [['text' => ($status == 'inactive') ? '🟢' : '🔴', 'callback_data' => 'change_status_rubpay'], ['text' => '💳 RUB:', 'callback_data' => 'null']],
             // другие кнопки
         ]]);
         editMessage($from_id, "✏️ Статус платежного шлюза робота следующий:", $message_id, $manage_off_on_paymanet);
@@ -2347,9 +2347,9 @@ elseif ($data == 'change_status_auth_all_country') {
             $sql->query("UPDATE `payment_setting` SET `nowpayment_status` = 'active'");
         }
         $manage_off_on_paymanet = json_encode(['inline_keyboard' => [
-            [['text' => ($payment_setting['rubpay_status'] == 'active') ? '🟢' : '🔴', 'callback_data' => 'change_status_rubpay'], ['text' => 'R :', 'callback_data' => 'null']],
-            [['text' => ($status == 'inactive') ? '🟢' : '🔴', 'callback_data' => 'change_status_nowpayment'], ['text' => ': Науплате ▫️', 'callback_data' => 'null']],
-            [['text' => ($payment_setting['card_status'] == 'active') ? '🟢' : '🔴', 'callback_data' => 'change_status_card'], ['text' => '▫️Карта к карте :', 'callback_data' => 'null']]
+            [['text' => ($payment_setting['rubpay_status'] == 'active') ? '🟢' : '🔴', 'callback_data' => 'change_status_rubpay'], ['text' => '💳 RUB :', 'callback_data' => 'null']],
+            [['text' => ($status == 'inactive') ? '🟢' : '🔴', 'callback_data' => 'change_status_nowpayment'], ['text' => ': Кпирто:', 'callback_data' => 'null']],
+            [['text' => ($payment_setting['card_status'] == 'active') ? '🟢' : '🔴', 'callback_data' => 'change_status_card'], ['text' => '▫️ QIWI :', 'callback_data' => 'null']]
         ]]);
         editMessage($from_id, "✏️ Статус платежного шлюза робота следующий:", $message_id, $manage_off_on_paymanet);
     }
@@ -2362,25 +2362,25 @@ elseif ($data == 'change_status_auth_all_country') {
             $sql->query("UPDATE `payment_setting` SET `card_status` = 'active'");
         }
         $manage_off_on_paymanet = json_encode(['inline_keyboard' => [
-            [['text' => ($payment_setting['RubPay'] == 'active') ? '🟢' : '🔴', 'callback_data' => 'change_status_rubpay'], ['text' => '▫️Заринпал :', 'callback_data' => 'null']],
-            [['text' => ($payment_setting['nowpayment_status'] == 'active') ? '🟢' : '🔴', 'callback_data' => 'change_status_nowpayment'], ['text' => ': Науплате ▫️', 'callback_data' => 'null']],
-            [['text' => ($status == 'inactive') ? '🟢' : '🔴', 'callback_data' => 'change_status_card'], ['text' => '▫️Карта к карте :', 'callback_data' => 'null']]
+            [['text' => ($payment_setting['rubpay_status'] == 'active') ? '🟢' : '🔴', 'callback_data' => 'change_status_rubpay'], ['text' => '💳 RUB:', 'callback_data' => 'null']],
+            [['text' => ($payment_setting['nowpayment_status'] == 'active') ? '🟢' : '🔴', 'callback_data' => 'change_status_nowpayment'], ['text' => ': Кпирто ▫️', 'callback_data' => 'null']],
+            [['text' => ($status == 'inactive') ? '🟢' : '🔴', 'callback_data' => 'change_status_card'], ['text' => '▫️ QIWI  :', 'callback_data' => 'null']]
         ]]);
         editMessage($from_id, "✏️ Статус платежного шлюза робота следующий:", $message_id, $manage_off_on_paymanet);
     }
     
     elseif ($text == '▫️Настроить номер карты') {
         step('set_card_number');
-        sendMessage($from_id, "🪪 Пожалуйста, отправьте ваш номер карты корректно и точно:", $back_panel);
+        sendMessage($from_id, "🪪 Пожалуйста, отправьте ваш QIWI кошелка корректно и точно:", $back_panel);
     }
     
     elseif ($user['step'] == 'set_card_number') {
         if (is_numeric($text)) {
             step('none');
             $sql->query("UPDATE `payment_setting` SET `card_number` = '$text'");
-            sendMessage($from_id, "✅ Ваш номер карты успешно настроен!\n\n◽️ Номер карты : <code>$text</code>", $manage_payment);
+            sendMessage($from_id, "✅ Ваш номер QIWI кошелка успешно настроен!\n\n◽️ номер QIWI кошелка : <code>$text</code>", $manage_payment);
         } else {
-            sendMessage($from_id, "❌ Ошибка в отправленном вами номере карты!", $back_panel);
+            sendMessage($from_id, "❌ Ошибка в отправленном вами номер QIWI кошелка!", $back_panel);
         }
     }    
     
@@ -2392,7 +2392,7 @@ elseif ($data == 'change_status_auth_all_country') {
     elseif ($user['step'] == 'set_card_number_name') {
         step('none');
         $sql->query("UPDATE `payment_setting` SET `card_number_name` = '$text'");
-        sendMessage($from_id, "✅ Имя владельца карты успешно установлено!\n\n◽️ Имя владельца карты : <code>$text</code>", $manage_payment);
+        sendMessage($from_id, "✅ Имя владельца QIWI кошелка успешно установлено!\n\n◽️ Имя владельца QIWI кошелка : <code>$text</code>", $manage_payment);
     }
     
     elseif ($text == '🪙 NOWPayments') {
@@ -2677,8 +2677,9 @@ elseif ($data == 'change_status_auth_all_country') {
 }
 
 /**
-* Project name: KasPanel
-* Channel: @KasPanel
-* Group: @KasPanelG
+* Project name: PROXYRU
+* Channel: @Proxy007
+* Bot: @Proxy007_bot
+* Support: @Proxy007_Supp
  * Version: 2.5
 **/
