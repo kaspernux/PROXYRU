@@ -169,23 +169,6 @@ read -p "[+] Введите пароль пользователя root (MySQL): 
 randdbpass=$(openssl rand -base64 8 | tr -dc 'a-zA-Z0-9' | head -c 10)
 randdbdb=$(pwgen -A 8 1)
 randdbname=$(openssl rand -base64 8 | tr -dc 'a-zA-Z0-9' | head -c 4)
-dbname="Proxygram_${randdbpass}"
-
-# Запрос имени пользователя базы данных (по умолчанию - случайное значение)
-echo -e "\n[+] Пожалуйста, введите имя пользователя базы данных (По умолчанию -> Ввод):"
-printf "[+] Имя пользователя по умолчанию [${randdbdb}] :"
-read dbuser
-if [ -z "$dbuser" ]; then
-    dbuser=$randdbdb
-fi
-
-# Запрос пароля пользователя root для MySQL
-read -p "[+] Введите пароль пользователя root (MySQL): " ROOT_PASSWORD
-
-# Генерация случайных значений для параметров базы данных
-randdbpass=$(openssl rand -base64 8 | tr -dc 'a-zA-Z0-9' | head -c 10)
-randdbdb=$(pwgen -A 8 1)
-randdbname=$(openssl rand -base64 8 | tr -dc 'a-zA-Z0-9' | head -c 4)
 dbname="Proxy007_${randdbpass}"
 
 # Запрос имени пользователя базы данных (по умолчанию - случайное значение)
@@ -204,16 +187,16 @@ if [ -z "$dbpass" ]; then
     dbpass=$randdbpass
 fi
 
-# Установка глобальной политики паролей на LOW (по желанию)
-sshpass -p $ROOT_PASSWORD mysql -u root -p -e "SET GLOBAL validate_password.policy = LOW;"
+# Установка политики паролей на LOW (по необходимости)
+sshpass -p $ROOT_PASSWORD mysql -u root -p -e "SET @@validate_password.policy = LOW;"
 
 # Создание базы данных и пользователя MySQL
 sshpass -p $ROOT_PASSWORD mysql -u root -p -e "CREATE DATABASE $dbname; \
-    CREATE USER '$dbuser'@'%' IDENTIFIED BY '$dbpass'; \
+    CREATE USER '$dbuser'@'%' IDENTIFIED WITH mysql_native_password BY '$dbpass'; \
     GRANT ALL PRIVILEGES ON $dbname.* TO '$dbuser'@'%'; \
-    CREATE USER '$dbuser'@'localhost' IDENTIFIED BY '$dbpass'; \
+    CREATE USER '$dbuser'@'localhost' IDENTIFIED WITH mysql_native_password BY '$dbpass'; \
     GRANT ALL PRIVILEGES ON $dbname.* TO '$dbuser'@'localhost'; \
-    FLUSH PRIVILEGES;"
+    FLUSH PRIVILEGES; GRANT SYSTEM_USER ON *.* TO 'root'@'localhost';"
 
 # Предоставление прав пользователю phpmyadmin (по необходимости)
 sshpass -p $ROOT_PASSWORD mysql -u root -p -e "GRANT ALL PRIVILEGES ON *.* TO 'phpmyadmin'@'localhost' WITH GRANT OPTION;"
