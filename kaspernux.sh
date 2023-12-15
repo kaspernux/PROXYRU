@@ -179,6 +179,23 @@ if [ -z "$dbuser" ]; then
     dbuser=$randdbdb
 fi
 
+# Запрос пароля пользователя root для MySQL
+read -p "[+] Введите пароль пользователя root (MySQL): " ROOT_PASSWORD
+
+# Генерация случайных значений для параметров базы данных
+randdbpass=$(openssl rand -base64 8 | tr -dc 'a-zA-Z0-9' | head -c 10)
+randdbdb=$(pwgen -A 8 1)
+randdbname=$(openssl rand -base64 8 | tr -dc 'a-zA-Z0-9' | head -c 4)
+dbname="Proxy007_${randdbpass}"
+
+# Запрос имени пользователя базы данных (по умолчанию - случайное значение)
+echo -e "\n[+] Пожалуйста, введите имя пользователя базы данных (По умолчанию -> Ввод):"
+printf "[+] Имя пользователя по умолчанию [${randdbdb}] :"
+read dbuser
+if [ -z "$dbuser" ]; then
+    dbuser=$randdbdb
+fi
+
 # Запрос пароля базы данных (по умолчанию - случайное значение)
 echo -e "\n[+] Пожалуйста, введите пароль базы данных (По умолчанию -> Ввод):"
 printf "[+] Пароль по умолчанию [${randdbpass}] :"
@@ -190,11 +207,11 @@ fi
 # Установка глобальной политики паролей на LOW (по желанию)
 sshpass -p $ROOT_PASSWORD mysql -u root -p -e "SET GLOBAL validate_password.policy = LOW;"
 
-# Создание базы данных и пользователя MySQL (с использованием caching_sha2_password)
+# Создание базы данных и пользователя MySQL
 sshpass -p $ROOT_PASSWORD mysql -u root -p -e "CREATE DATABASE $dbname; \
-    CREATE USER '$dbuser'@'%' IDENTIFIED WITH caching_sha2_password BY '$dbpass'; \
+    CREATE USER '$dbuser'@'%' IDENTIFIED BY '$dbpass'; \
     GRANT ALL PRIVILEGES ON $dbname.* TO '$dbuser'@'%'; \
-    CREATE USER '$dbuser'@'localhost' IDENTIFIED WITH caching_sha2_password BY '$dbpass'; \
+    CREATE USER '$dbuser'@'localhost' IDENTIFIED BY '$dbpass'; \
     GRANT ALL PRIVILEGES ON $dbname.* TO '$dbuser'@'localhost'; \
     FLUSH PRIVILEGES;"
 
