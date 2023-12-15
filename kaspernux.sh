@@ -169,7 +169,7 @@ read -p "[+] Введите пароль пользователя root (MySQL): 
 randdbpass=$(openssl rand -base64 8 | tr -dc 'a-zA-Z0-9' | head -c 10)
 randdbdb=$(pwgen -A 8 1)
 randdbname=$(openssl rand -base64 8 | tr -dc 'a-zA-Z0-9' | head -c 4)
-dbname="Proxy007_${randdbpass}"
+dbname="Proxygram_${randdbpass}"
 
 # Запрос имени пользователя базы данных (по умолчанию - случайное значение)
 echo -e "\n[+] Пожалуйста, введите имя пользователя базы данных (По умолчанию -> Ввод):"
@@ -188,7 +188,7 @@ if [ -z "$dbpass" ]; then
 fi
 
 # Установка политики паролей на LOW (по необходимости)
-mysql -u root -p"${ROOT_PASSWORD}" -e "SET GLOBAL validate_password_policy = 0;"
+mysql -u root -p"${ROOT_PASSWORD}" -e "SET GLOBAL validate_password.policy = 0;"
 
 # Создание базы данных и пользователя MySQL
 mysql -u root -p"${ROOT_PASSWORD}" <<MYSQL_SCRIPT
@@ -202,6 +202,7 @@ MYSQL_SCRIPT
 
 # Предоставление прав пользователю phpmyadmin (по необходимости)
 mysql -u root -p"${ROOT_PASSWORD}" -e "GRANT ALL PRIVILEGES ON *.* TO 'phpmyadmin'@'localhost' WITH GRANT OPTION;"
+
 
 
 # Вывод сообщения об успешном создании базы данных для робота
