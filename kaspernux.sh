@@ -188,15 +188,15 @@ if [ -z "$dbpass" ]; then
 fi
 
 # Установка политики паролей на LOW (по необходимости)
-mysql -u root -p"${ROOT_PASSWORD}" -e "SET GLOBAL validate_password.policy = LOW;"
+mysql -u root -p"${ROOT_PASSWORD}" -e "SET GLOBAL validate_password.policy = 0;"
 
 # Создание базы данных и пользователя MySQL
 mysql -u root -p"${ROOT_PASSWORD}" -e "CREATE DATABASE IF NOT EXISTS $dbname; \
-    CREATE USER IF NOT EXISTS '$dbuser'@'%' IDENTIFIED WITH mysql_native_password BY '$dbpass'; \
-    GRANT ALL PRIVILEGES ON $dbname.* TO '$dbuser'@'%'; \
-    CREATE USER IF NOT EXISTS '$dbuser'@'localhost' IDENTIFIED WITH mysql_native_password BY '$dbpass'; \
-    GRANT ALL PRIVILEGES ON $dbname.* TO '$dbuser'@'localhost'; \
-    FLUSH PRIVILEGES;"
+   CREATE USER IF NOT EXISTS '$dbuser'@'%' IDENTIFIED WITH mysql_native_password BY '$dbpass'; \
+   GRANT ALL PRIVILEGES ON $dbname.* TO '$dbuser'@'%'; \
+   CREATE USER IF NOT EXISTS '$dbuser'@'localhost' IDENTIFIED WITH mysql_native_password BY '$dbpass'; \
+   GRANT ALL PRIVILEGES ON $dbname.* TO '$dbuser'@'localhost'; \
+   FLUSH PRIVILEGES;"
 
 # Предоставление прав пользователю phpmyadmin (по необходимости)
 mysql -u root -p"${ROOT_PASSWORD}" -e "GRANT ALL PRIVILEGES ON *.* TO 'phpmyadmin'@'localhost' WITH GRANT OPTION;"
