@@ -187,26 +187,22 @@ if [ -z "$dbpass" ]; then
     dbpass=$randdbpass
 fi
 
-# Установка политики паролей на LOW (по необходимости)
-mysql -u root -p"${ROOT_PASSWORD}" -e "SET GLOBAL validate_password_policy = 0;"
-
 # Создание базы данных и пользователя MySQL
-mysql -u root -p"${ROOT_PASSWORD}" <<MYSQL_SCRIPT
-CREATE DATABASE IF NOT EXISTS $dbname;
-CREATE USER IF NOT EXISTS '$dbuser'@'%' IDENTIFIED WITH mysql_native_password BY '$dbpass';
-GRANT ALL PRIVILEGES ON $dbname.* TO '$dbuser'@'%';
-CREATE USER IF NOT EXISTS '$dbuser'@'localhost' IDENTIFIED WITH mysql_native_password BY '$dbpass';
-GRANT ALL PRIVILEGES ON $dbname.* TO '$dbuser'@'localhost';
-FLUSH PRIVILEGES;
-MYSQL_SCRIPT
+sshpass -p $ROOT_PASSWORD mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS $dbname; \
+   CREATE USER IF NOT EXISTS '$dbuser'@'%' IDENTIFIED BY '$dbpass' PASSWORD EXPIRE NEVER; \
+   ALTER USER '$dbuser'@'%' PASSWORD EXPIRE NEVER; \
+   GRANT ALL PRIVILEGES ON $dbname.* TO '$dbuser'@'%'; \
+   CREATE USER IF NOT EXISTS '$dbuser'@'localhost' IDENTIFIED BY '$dbpass' PASSWORD EXPIRE NEVER; \
+   ALTER USER '$dbuser'@'localhost' PASSWORD EXPIRE NEVER; \
+   GRANT ALL PRIVILEGES ON $dbname.* TO '$dbuser'@'localhost'; \
+   FLUSH PRIVILEGES;"
 
 # Предоставление прав пользователю phpmyadmin (по необходимости)
-mysql -u root -p"${ROOT_PASSWORD}" -e "GRANT ALL PRIVILEGES ON *.* TO 'phpmyadmin'@'localhost' WITH GRANT OPTION;"
-
-
+sshpass -p $ROOT_PASSWORD mysql -u root -p -e "GRANT ALL PRIVILEGES ON *.* TO 'phpmyadmin'@'localhost' WITH GRANT OPTION;"
 
 # Вывод сообщения об успешном создании базы данных для робота
 echo -e "\n[+] База данных робота успешно создана!"
+
 
 wait
 
