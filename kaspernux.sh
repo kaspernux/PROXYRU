@@ -189,10 +189,10 @@ fi
 
 # Создание базы данных и пользователя MySQL
 sshpass -p $ROOT_PASSWORD mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS $dbname; \
-   CREATE USER IF NOT EXISTS '$dbuser'@'%' IDENTIFIED BY '$dbpass' PASSWORD EXPIRE NEVER; \
+   CREATE USER IF NOT EXISTS '$dbuser'@'%' IDENTIFIED BY '$dbpass'; \
    ALTER USER '$dbuser'@'%' PASSWORD EXPIRE NEVER; \
    GRANT ALL PRIVILEGES ON $dbname.* TO '$dbuser'@'%'; \
-   CREATE USER IF NOT EXISTS '$dbuser'@'localhost' IDENTIFIED BY '$dbpass' PASSWORD EXPIRE NEVER; \
+   CREATE USER IF NOT EXISTS '$dbuser'@'localhost' IDENTIFIED BY '$dbpass'; \
    ALTER USER '$dbuser'@'localhost' PASSWORD EXPIRE NEVER; \
    GRANT ALL PRIVILEGES ON $dbname.* TO '$dbuser'@'localhost'; \
    FLUSH PRIVILEGES;"
