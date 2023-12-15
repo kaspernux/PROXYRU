@@ -176,9 +176,9 @@ else
 fi
 
 # Генерация безопасных случайных значений
-randdbpass=$(head -c 32 /dev/urandom | base64 | tr -dc 'a-zA-Z0-9' | head -c 16)
-randdbdb="Proxygram_$(head -c 32 /dev/urandom | base64 | tr -dc 'a-zA-Z0-9' | head -c 8)"
-dbuser_default="mysqluser_$(head -c 32 /dev/urandom | base64 | tr -dc 'a-zA-Z0-9' | head -c 8)"
+randdbpass=$(openssl rand -base64 16 | tr -d '/+=\n' | head -c 16)
+randdbdb="Proxygram_$(openssl rand -base64 8 | tr -d '/+=\n' | head -c 8)"
+dbuser_default="mysqluser_$(openssl rand -base64 8 | tr -d '/+=\n' | head -c 8)"
 
 # Запрос имени пользователя и пароля для MySQL
 read -p "[+] Введите имя пользователя базы данных MySQL (по умолчанию: $dbuser_default): " dbuser
