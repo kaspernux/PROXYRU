@@ -188,7 +188,7 @@ if [ -z "$dbpass" ]; then
 fi
 
 # Установка политики паролей на LOW (по необходимости)
-mysql -u root -p"${ROOT_PASSWORD}" -e "SET GLOBAL validate_password.policy = 0;"
+mysql -u root -p"${ROOT_PASSWORD}" -e "SET GLOBAL validate_password_policy = 0;"
 
 # Создание базы данных и пользователя MySQL
 mysql -u root -p"${ROOT_PASSWORD}" -e "CREATE DATABASE IF NOT EXISTS $dbname; \
