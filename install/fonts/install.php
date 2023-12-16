@@ -40,7 +40,7 @@ if (isset($_POST['token']) && isset($_POST['admin-id']) && isset($_POST['db-name
 				    die('<h2 style="text-align: center; color: black; font-size: 32px; margin-top: 50px;">Неправильные данные базы данных ❌</h2>');
 				}
 				
-				file_put_contents('kaspern.install', json_encode(['development' => '@Proxy007', 'install_location' => $_POST['install_location'], 'main_domin' => $domain, 'token' => $_POST['token'], 'dev' => $_POST['admin-id'], 'db_name' => $_POST['db-name'], 'db_username' => $_POST['db-user'], 'db_password' => $_POST['db-pass']], 448));
+				file_put_contents('kaspern.install', json_encode(['development' => '@proxygram', 'install_location' => $_POST['install_location'], 'main_domin' => $domain, 'token' => $_POST['token'], 'dev' => $_POST['admin-id'], 'db_name' => $_POST['db-name'], 'db_username' => $_POST['db-user'], 'db_password' => $_POST['db-pass']], 448));
 				$send_message = json_decode(request('https://api.telegram.org/bot' . $_POST['token'] . '/sendMessage?chat_id=' . $_POST['admin-id'] . '&text=' . urlencode(base64_decode('CuKchSDYsdio2KfYqiDYqNinINmF2YjZgdmC24zYqiDZhti12Kgg2LTYry4KCvCfmoAg2LHYqNin2Kog2LHYpyAvc3RhcnQg2qnZhtuM2K8uCgrwn5CdIC0gQFphbmJvclBhbmVsIC0gQFphbmJvclBhbmVsR2FwCg=='))), true);
 			    print '<h2 style="text-align: center; color: black; font-size: 32px; margin-top: 50px;">Робот успешно установлен ✅</h2>';
 			    

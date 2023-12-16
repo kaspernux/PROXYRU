@@ -1,6 +1,6 @@
 <?php
 
-date_default_timezone_set('Asia/Tehran');
+date_default_timezone_set('Europe/Moscow');
 error_reporting(E_ALL ^ E_NOTICE);
 
 $config = ['version' => '2.5', 'domain' => 'https://' . $_SERVER['HTTP_HOST'] . '/' . explode('/', explode('html/', $_SERVER['SCRIPT_FILENAME'])[1])[0], 'token' => '[*TOKEN*]', 'dev' => '[*DEV*]', 'database' => ['db_name' => '[*DB-NAME*]', 'db_username' => '[*DB-USER*]', 'db_password' => '[*DB-PASS*]']];
@@ -9,7 +9,7 @@ $sql = new mysqli('localhost', $config['database']['db_username'], $config['data
 $sql->set_charset("utf8mb4");
 
 if ($sql->connect_error) {
-	die(json_encode(['status' => false, 'msg' => $sql->connect_error, 'error' => 'database'], 423));
+    die(json_encode(['status' => false, 'msg' => $sql->connect_error, 'error' => 'database'], 423));
 }
 
 define('API_KEY', $config['token']);
@@ -31,7 +31,7 @@ if (isset($update->message)) {
     $data = $update->callback_query->data;
     $query_id = $update->callback_query->id;
     $message_id = $update->callback_query->message->message_id;
-    $username = isset($update->callback_query->from->username) ? '@' . $update->callback_query->from->username : "ندارد";
+    $username = isset($update->callback_query->from->username) ? '@' . $update->callback_query->from->username : "нет";
 }
 
 # ----------------- [ <- others -> ] ----------------- #
@@ -59,6 +59,7 @@ if (!isset($sql->connect_error)) {
         }
     }
 }
+
 
 # ----------------- [ <- functions -> ] ----------------- #
 

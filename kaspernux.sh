@@ -34,7 +34,7 @@ colorized_echo() {
     esac
 }
 
-colorized_echo green "\n[+] - Подождите несколько часов, устанавливается робот панели пчёл. . ."
+colorized_echo green "\n[+] - Подождите несколько часов, устанавливается PROXYGRAM
 
 # процесс обновления !
 sudo apt update && apt upgrade -y
@@ -111,8 +111,8 @@ sudo systemctl restart apache2.service
 
 wait
 
-git clone https://github.com/kaspernux/PROXYRU.git /var/www/html/Proxygram-bot
-sudo chmod -R 777 /var/www/html/Proxygram-bot
+git clone https://github.com/kaspernux/PROXYRU.git /home/grambot/web/tg.proxygram.io/Proxygram
+sudo chmod -R 777 /home/grambot/web/tg.proxygram.io/Proxygram
 colorized_echo green "\n\tВсе файлы/папки робота PROXYGRAM успешно установлены на вашем сервере!"
 
 wait
@@ -162,47 +162,42 @@ echo -e " \n"
 
 wait
 
-# Запрос пароля пользователя root для MySQL
-read -p "[+] Введите пароль пользователя root (MySQL): " ROOT_PASSWORD
+# Проверка, установлен ли MySQL
+dpkg -s mysql-server &> /dev/null
+if [ $? -eq 0 ]; then
+    colorized_echo yellow "MySQL уже установлен на вашем сервере."
+else
+    # Запрос пароля пользователя root для MySQL
+    read -s -p "[+] Введите пароль пользователя root MySQL : " ROOT_PASSWORD
+    echo
 
-# Генерация случайных значений для параметров базы данных
-randdbpass=$(openssl rand -base64 8 | tr -dc 'a-zA-Z0-9' | head -c 10)
-randdbdb=$(pwgen -A 8 1)
-randdbname=$(openssl rand -base64 8 | tr -dc 'a-zA-Z0-9' | head -c 4)
-dbname="Proxygram_${randdbpass}"
-
-# Запрос имени пользователя базы данных (по умолчанию - случайное значение)
-echo -e "\n[+] Пожалуйста, введите имя пользователя базы данных (По умолчанию -> Ввод):"
-printf "[+] Имя пользователя по умолчанию [${randdbdb}] :"
-read dbuser
-if [ -z "$dbuser" ]; then
-    dbuser=$randdbdb
+    # Установка MySQL
+    sudo apt-get install mysql-server -y
 fi
 
-# Запрос пароля базы данных (по умолчанию - случайное значение)
-echo -e "\n[+] Пожалуйста, введите пароль базы данных (По умолчанию -> Ввод):"
-printf "[+] Пароль по умолчанию [${randdbpass}] :"
-read dbpass
-if [ -z "$dbpass" ]; then
-    dbpass=$randdbpass
-fi
+# Генерация безопасных случайных значений
+randdbpass=$(openssl rand -base64 16 | tr -d '/+=\n' | head -c 16)
+randdbdb="Proxygram_$(openssl rand -base64 8 | tr -d '/+=\n' | head -c 8)"
+dbuser_default="mysqluser_$(openssl rand -base64 8 | tr -d '/+=\n' | head -c 8)"
 
-# Установка глобальной политики паролей на LOW (по желанию)
-sshpass -p $ROOT_PASSWORD mysql -u root -p -e "SET GLOBAL validate_password.policy = LOW;"
+# Запрос имени пользователя и пароля для MySQL
+read -p "[+] Введите имя пользователя базы данных MySQL (по умолчанию: $dbuser_default): " dbuser
+dbuser="${dbuser:-$dbuser_default}"
 
-# Создание базы данных и пользователя MySQL (с использованием caching_sha2_password)
-sshpass -p $ROOT_PASSWORD mysql -u root -p -e "CREATE DATABASE $dbname; \
-    CREATE USER '$dbuser'@'%' IDENTIFIED WITH caching_sha2_password BY '$dbpass'; \
-    GRANT ALL PRIVILEGES ON $dbname.* TO '$dbuser'@'%'; \
-    CREATE USER '$dbuser'@'localhost' IDENTIFIED WITH caching_sha2_password BY '$dbpass'; \
-    GRANT ALL PRIVILEGES ON $dbname.* TO '$dbuser'@'localhost'; \
-    FLUSH PRIVILEGES;"
+read -p "[+] Введите пароль для пользователя базы данных MySQL (по умолчанию: $randdbpass): " dbpass
+dbpass="${dbpass:-$randdbpass}"
 
-# Предоставление прав пользователю phpmyadmin (по необходимости)
-sshpass -p $ROOT_PASSWORD mysql -u root -p -e "GRANT ALL PRIVILEGES ON *.* TO 'phpmyadmin'@'localhost' WITH GRANT OPTION;"
+# Создание базы данных и пользователя MySQL
+sudo mysql -u root -p"$ROOT_PASSWORD" -e "CREATE DATABASE IF NOT EXISTS $randdbdb;"
+sudo mysql -u root -p"$ROOT_PASSWORD" -e "CREATE USER IF NOT EXISTS '$dbuser'@'localhost' IDENTIFIED BY '$dbpass';"
+sudo mysql -u root -p"$ROOT_PASSWORD" -e "CREATE USER IF NOT EXISTS '$dbuser'@'%' IDENTIFIED BY '$dbpass';"
+sudo mysql -u root -p"$ROOT_PASSWORD" -e "GRANT ALL PRIVILEGES ON $randdbdb.* TO '$dbuser'@'localhost';"
+sudo mysql -u root -p"$ROOT_PASSWORD" -e "GRANT ALL PRIVILEGES ON $randdbdb.* TO '$dbuser'@'%';"
+sudo mysql -u root -p"$ROOT_PASSWORD" -e "FLUSH PRIVILEGES;"
 
-# Вывод сообщения об успешном создании базы данных для робота
-echo -e "\n[+] База данных робота успешно создана!"
+
+# Уведомление пользователя об успешном создании базы данных
+colorized_echo green "\n[+] База данных MySQL '$randdbdb' и пользователь '$dbuser' успешно созданы для вашего бота!"
 
 wait
 
@@ -228,7 +223,7 @@ fi
 wait
 sleep 2
 
-config_address="/var/www/html/Proxygram-bot/install/kaspernux.install"
+config_address="/home/grambot/web/tg.proxygram.io/Proxygram/install/kaspernux.install"
 
 if [ -f "$config_address" ]; then
     rm "$config_address"
@@ -240,11 +235,11 @@ colorized_echo green "[+] Пожалуйста, подождите . . .\n"
 sleep 1
 
 # добавить информацию в файл
-# touch('/var/www/html/Proxygram-bot/install/kaspernux.install')
-echo "{\"development\":\"@Proxygram\",\"install_location\":\"server\",\"main_domin\":\"${DOMAIN}\",\"token\":\"${TOKEN}\",\"dev\":\"${CHAT_ID}\",\"db_name\":\"${dbname}\",\"db_username\":\"${randdbdb}\",\"db_password\":\"${randdbpass}\"}" > /var/www/html/Proxygram-bot/install/kaspernux.install
+# touch('/home/grambot/web/tg.proxygram.io/Proxygram/install/kaspernux.install')
+echo "{\"development\":\"@Proxygram\",\"install_location\":\"server\",\"main_domin\":\"${DOMAIN}\",\"token\":\"${TOKEN}\",\"dev\":\"${CHAT_ID}\",\"db_name\":\"${dbname}\",\"db_username\":\"${randdbdb}\",\"db_password\":\"${randdbpass}\"}" > /home/grambot/web/tg.proxygram.io/Proxygram/install/kaspernux.install
 
-source_file="/var/www/html/Proxygram-bot/config.php"
-destination_file="/var/www/html/Proxygram-bot/config.php.tmp"
+source_file="/home/grambot/web/tg.proxygram.io/Proxygram/config.php"
+destination_file="/home/grambot/web/tg.proxygram.io/Proxygram/config.php.tmp"
 replace=$(cat "$source_file" | sed -e "s/\[\*TOKEN\*\]/${TOKEN}/g" -e "s/\[\*DEV\*\]/${CHAT_ID}/g" -e "s/\[\*DB-NAME\*\]/${dbname}/g" -e "s/\[\*DB-USER\*\]/${dbuser}/g" -e "s/\[\*DB-PASS\*\]/${dbpass}/g")
 echo "$replace" > "$destination_file"
 mv "$destination_file" "$source_file"
