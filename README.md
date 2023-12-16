@@ -183,6 +183,6 @@ Obmen.center - сервис для покупки/продажи и обмена
 ## Канал и группа Proxygram Panel
 
 **Обязательно присоединяйтесь к каналу и группе Kaspernux Panel.**
-- Канал: [@Vpn007](https://t.me/Proxygram)
-- Группа: [@ProxygramHub](https://t.me/ProxygramHub)
+- Саппорт : [@Proxygram_Sup](https://t.me/Proxygram)
+- Канал : [@ProxygramHub](https://t.me/ProxygramHub)
 - Бот: [@ProxygramCA_Bot](https://t.me/ProxygramCA_bot)
