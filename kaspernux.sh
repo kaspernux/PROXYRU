@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# Написано: Proxy007
-# Канал: @Proxy007
-# Группа: @Proxy007Gap
+# Написано: PROXYGRAM
+# Канал: @ProxygramHUB
+# Бот: @ProxygramCA_bot
 
 if [ "$(id -u)" -ne 0 ]; then
     echo -e "\033[33mПожалуйста, запустите от имени root\033[0m"
@@ -70,10 +70,10 @@ for i in "${PACKAGES[@]}"
     done
 
 # установка еще !
-echo 'phpmyadmin phpmyadmin/app-password-confirm password Proxy007' | debconf-set-selections
+echo 'phpmyadmin phpmyadmin/app-password-confirm password Proxygram' | debconf-set-selections
 echo 'phpmyadmin phpmyadmin/reconfigure-webserver multiselect apache2' | debconf-set-selections
-echo 'phpmyadmin phpmyadmin/mysql/admin-pass password Proxy007' | debconf-set-selections
-echo 'phpmyadmin phpmyadmin/mysql/app-pass password Proxy007' | debconf-set-selections
+echo 'phpmyadmin phpmyadmin/mysql/admin-pass password Proxygram' | debconf-set-selections
+echo 'phpmyadmin phpmyadmin/mysql/app-pass password Proxygram' | debconf-set-selections
 echo 'phpmyadmin phpmyadmin/dbconfig-install boolean true' | debconf-set-selections
 sudo apt-get install phpmyadmin -y
 sudo ln -s /etc/phpmyadmin/apache.conf /etc/apache2/conf-available/phpmyadmin.conf
@@ -94,7 +94,7 @@ sudo systemctl start apache2
 ufw allow 'Apache Full'
 sudo systemctl restart apache2
 
-colorized_echo green "Установка PROXYRU . . ."
+colorized_echo green "Установка PROXYGRAM . . ."
 
 sleep 2
 
@@ -111,67 +111,98 @@ sudo systemctl restart apache2.service
 
 wait
 
-git clone https://github.com/kaspernux/PROXYRU.git /var/www/html/PROXYRUBot
-sudo chmod -R 777 /var/www/html/PROXURUBot/
-colorized_echo green "\n\tВсе файлы/папки робота PROXYRU успешно установлены на вашем сервере!"
+git clone https://github.com/kaspernux/PROXYRU.git /var/www/html/Proxygram-bot
+sudo chmod -R 777 /var/www/html/Proxygram-bot
+colorized_echo green "\n\tВсе файлы/папки робота PROXYGRAM успешно установлены на вашем сервере!"
 
 wait
 
 clear
 echo -e " \n"
 
+echo -e "\n[+] Настройка SSL/TLS для вашего домена\n"
+
+# Запрос пользователя для указания домена
 read -p "[+] Введите домен без [http:// | https://]: " domain
-if [ "$domain" = "" ]; then
-    colorized_echo green "Хорошо, продолжаем. . ."
-    colorized_echo green "Пожалуйста, подождите !"
-    sleep 2
+
+# Проверка наличия указанного домена
+if [ -z "$domain" ]; then
+    echo -e "[!] Ошибка: Домен не указан. Выход."
+    exit 1
 else
     DOMAIN="$domain"
 fi
 
+# Информирование пользователя и ожидание
+echo -e "\n[+] Хорошо, продолжаем..."
+echo -e "[+] Пожалуйста, подождите!"
+sleep 2
+
+# Разрешение портов 80 и 443 через UFW
 sudo ufw allow 80
 sudo ufw allow 443 
-sudo apt install letsencrypt -y
+
+# Установка необходимых пакетов
+sudo apt-get update
+sudo apt-get -y install letsencrypt
 sudo apt-get -y install certbot python3-certbot-apache
+
+# Включение таймера certbot для автоматического обновления
 sudo systemctl enable certbot.timer
+
+# Получение SSL/TLS-сертификата с использованием certbot
 sudo certbot certonly --standalone --agree-tos --preferred-challenges http -d $DOMAIN
+
+# Настройка Apache с использованием полученного сертификата
 sudo certbot --apache --agree-tos --preferred-challenges http -d $DOMAIN
 
-wait
+# Очистка экрана для чистого вывода
 clear
 echo -e " \n"
 
 wait
 
-read -p "[+] Введите пароль пользователя root (MySql): " ROOT_PASSWORD
+# Запрос пароля пользователя root для MySQL
+read -p "[+] Введите пароль пользователя root (MySQL): " ROOT_PASSWORD
+
+# Генерация случайных значений для параметров базы данных
 randdbpass=$(openssl rand -base64 8 | tr -dc 'a-zA-Z0-9' | head -c 10)
 randdbdb=$(pwgen -A 8 1)
 randdbname=$(openssl rand -base64 8 | tr -dc 'a-zA-Z0-9' | head -c 4)
-dbname="Proxy007_${randdbpass}"
+dbname="Proxygram_${randdbpass}"
 
-colorized_echo green "Пожалуйста, введите имя пользователя базы данных (По умолчанию -> Ввод):"
+# Запрос имени пользователя базы данных (по умолчанию - случайное значение)
+echo -e "\n[+] Пожалуйста, введите имя пользователя базы данных (По умолчанию -> Ввод):"
 printf "[+] Имя пользователя по умолчанию [${randdbdb}] :"
 read dbuser
-if [ "$dbuser" = "" ]; then
+if [ -z "$dbuser" ]; then
     dbuser=$randdbdb
-else
-    dbuser=$dbuser
 fi
 
-colorized_echo green "Пожалуйста, введите пароль базы данных (По умолчанию -> Ввод):"
+# Запрос пароля базы данных (по умолчанию - случайное значение)
+echo -e "\n[+] Пожалуйста, введите пароль базы данных (По умолчанию -> Ввод):"
 printf "[+] Пароль по умолчанию [${randdbpass}] :"
 read dbpass
-if [ "$dbpass" = "" ]; then
+if [ -z "$dbpass" ]; then
     dbpass=$randdbpass
-else
-    dbpass=$dbpass
 fi
 
+# Установка глобальной политики паролей на LOW (по желанию)
 sshpass -p $ROOT_PASSWORD mysql -u root -p -e "SET GLOBAL validate_password.policy = LOW;"
-sshpass -p $ROOT_PASSWORD mysql -u root -p -e "CREATE DATABASE $dbname;" -e "CREATE USER '$dbuser'@'%' IDENTIFIED WITH mysql_native_password BY '$dbpass';GRANT ALL PRIVILEGES ON * . * TO '$dbuser'@'%';FLUSH PRIVILEGES;" -e "CREATE USER '$dbuser'@'localhost' IDENTIFIED WITH mysql_native_password BY '$dbpass';GRANT ALL PRIVILEGES ON * . * TO '$dbuser'@'localhost';FLUSH PRIVILEGES;"
+
+# Создание базы данных и пользователя MySQL (с использованием caching_sha2_password)
+sshpass -p $ROOT_PASSWORD mysql -u root -p -e "CREATE DATABASE $dbname; \
+    CREATE USER '$dbuser'@'%' IDENTIFIED WITH caching_sha2_password BY '$dbpass'; \
+    GRANT ALL PRIVILEGES ON $dbname.* TO '$dbuser'@'%'; \
+    CREATE USER '$dbuser'@'localhost' IDENTIFIED WITH caching_sha2_password BY '$dbpass'; \
+    GRANT ALL PRIVILEGES ON $dbname.* TO '$dbuser'@'localhost'; \
+    FLUSH PRIVILEGES;"
+
+# Предоставление прав пользователю phpmyadmin (по необходимости)
 sshpass -p $ROOT_PASSWORD mysql -u root -p -e "GRANT ALL PRIVILEGES ON *.* TO 'phpmyadmin'@'localhost' WITH GRANT OPTION;"
 
-colorized_echo green "[+] База данных робота успешно создана!"
+# Вывод сообщения об успешном создании базы данных для робота
+echo -e "\n[+] База данных робота успешно создана!"
 
 wait
 
@@ -197,7 +228,7 @@ fi
 wait
 sleep 2
 
-config_address="/var/www/html/Proxy007Bot/install/kaspernux.install"
+config_address="/var/www/html/Proxygram-bot/install/kaspernux.install"
 
 if [ -f "$config_address" ]; then
     rm "$config_address"
@@ -209,11 +240,11 @@ colorized_echo green "[+] Пожалуйста, подождите . . .\n"
 sleep 1
 
 # добавить информацию в файл
-# touch('/var/www/html/Proxy007Bot/install/kaspernux.install')
-echo "{\"development\":\"@Proxy007\",\"install_location\":\"server\",\"main_domin\":\"${DOMAIN}\",\"token\":\"${TOKEN}\",\"dev\":\"${CHAT_ID}\",\"db_name\":\"${dbname}\",\"db_username\":\"${randdbdb}\",\"db_password\":\"${randdbpass}\"}" > /var/www/html/Proxy007Bot/install/kaspernux.install
+# touch('/var/www/html/Proxygram-bot/install/kaspernux.install')
+echo "{\"development\":\"@Proxygram\",\"install_location\":\"server\",\"main_domin\":\"${DOMAIN}\",\"token\":\"${TOKEN}\",\"dev\":\"${CHAT_ID}\",\"db_name\":\"${dbname}\",\"db_username\":\"${randdbdb}\",\"db_password\":\"${randdbpass}\"}" > /var/www/html/Proxygram-bot/install/kaspernux.install
 
-source_file="/var/www/html/Proxy007Bot/config.php"
-destination_file="/var/www/html/Proxy007Bot/config.php.tmp"
+source_file="/var/www/html/Proxygram-bot/config.php"
+destination_file="/var/www/html/Proxygram-bot/config.php.tmp"
 replace=$(cat "$source_file" | sed -e "s/\[\*TOKEN\*\]/${TOKEN}/g" -e "s/\[\*DEV\*\]/${CHAT_ID}/g" -e "s/\[\*DB-NAME\*\]/${dbname}/g" -e "s/\[\*DB-USER\*\]/${dbuser}/g" -e "s/\[\*DB-PASS\*\]/${dbpass}/g")
 echo "$replace" > "$destination_file"
 mv "$destination_file" "$source_file"
@@ -222,17 +253,17 @@ sleep 2
 
 # процесс curl
 colorized_echo blue "Статус базы данных:"
-curl --location "https://${DOMAIN}/Proxy007Bot/sql/sql.php?db_password=${dbpass}&db_name=${dbname}&db_username=${dbuser}"
+curl --location "https://${DOMAIN}/Proxygram-bot/sql/sql.php?db_password=${dbpass}&db_name=${dbname}&db_username=${dbuser}"
 
 colorized_echo blue "\n\nСтатус Webhook:"
-curl -F "url=https://${DOMAIN}/Proxy007Bot/index.php" "https://api.telegram.org/bot${TOKEN}/setWebhook"
+curl -F "url=https://${DOMAIN}/Proxygram-bot/index.php" "https://api.telegram.org/bot${TOKEN}/setWebhook"
 
 colorized_echo blue "\n\nСтатус отправки сообщения:"
-TEXT_MESSAGE="✅ Робот Proxy007 успешно установлен!"
+TEXT_MESSAGE="✅ Робот PROXYGRAM успешно установлен!"
 curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" -d chat_id="${CHAT_ID}" -d text="${TEXT_MESSAGE}"
 echo -e "\n\n"
 
 sleep 1
-colorized_echo green "[+] Робот Proxy007 успешно установлен"
-colorized_echo green "[+] Канал в Telegram: @Proxy007 || Группа в Telegram: @Proxy007Gap"
+colorized_echo green "[+] Робот PROXYGRAM успешно установлен"
+colorized_echo green "[+] Канал в Telegram: @ProxygramHUB || Бот в Telegram: @ProxygramCA_bot"
 echo -e "\n"
