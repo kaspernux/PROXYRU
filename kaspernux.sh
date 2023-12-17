@@ -129,7 +129,15 @@ echo -e " \n"
 echo -e "\n[+] Настройка SSL/TLS для вашего домена\n"
 
 # Запрос пользователя для указания домена
+echo -e "\n[+] Настройка SSL/TLS для вашего домена\n"
+
+# Запрос пользователя для указания домена
 read -p "[+] Введите домен без [http:// | https://]: " domain
+
+# Проверка наличия указанного домена
+if [ -z "$domain" ]; then
+    echo -e "[!] Ошибка: Домен не указан. Выход."
+    exit 1
 
 # Проверка наличия указанного домена
 if [ -z "$domain" ]; then
@@ -143,25 +151,37 @@ echo -e "[+] Пожалуйста, подождите!"
 sleep 2
 
 # Разрешение портов 80 и 443 через UFW
+# Информирование пользователя и ожидание
 echo -e "\n[+] Хорошо, продолжаем..."
 echo -e "[+] Пожалуйста, подождите!"
 sleep 2
 
+# Разрешение портов 80 и 443 через UFW
 sudo ufw allow 80
-sudo ufw allow 443
+sudo ufw allow 443 
 
 # Установка необходимых пакетов
 sudo apt-get update
-sudo apt-get -y install letsencrypt certbot python3-certbot-apache
+sudo apt-get -y install letsencrypt
+
+# Установка необходимых пакетов
+sudo apt-get update
+sudo apt-get -y install letsencrypt
+sudo apt-get -y install certbot python3-certbot-apache
 
 # Включение таймера certbot для автоматического обновления
 sudo systemctl enable certbot.timer
 
 # Получение SSL/TLS-сертификата с использованием certbot
-sudo certbot certonly --standalone --agree-tos --preferred-challenges http -d $domain
+sudo certbot certonly --standalone --agree-tos --preferred-challenges http -d $DOMAIN
 
 # Настройка Apache с использованием полученного сертификата
-sudo certbot --apache --agree-tos --preferred-challenges http -d $domain
+
+# Настройка Apache с использованием полученного сертификата
+sudo certbot certonly --standalone --agree-tos --preferred-challenges http -d $DOMAIN
+
+# Настройка Apache с использованием полученного сертификата
+sudo certbot --apache --agree-tos --preferred-challenges http -d $DOMAIN
 
 # Очистка экрана для чистого вывода
 clear
@@ -182,14 +202,20 @@ else
     sudo apt-get install mysql-server -y
 fi
 
+
 # Генерация безопасных случайных значений
 randdbpass=$(openssl rand -base64 16 | tr -d '/+=\n' | head -c 16)
 randdbdb="Proxygram_$(openssl rand -base64 8 | tr -d '/+=\n' | head -c 8)"
 dbuser_default="mysqluser_$(openssl rand -base64 8 | tr -d '/+=\n' | head -c 8)"
 
-# Запрос имени пользователя и пароля для MySQL
-read -p "[+] Введите имя пользователя базы данных MySQL (по умолчанию: $dbuser): " dbuser
-dbuser="${dbuser:-$dbuser}"
+if [ -z "$ROOT_PASSWORD" ]; then
+    echo -e "\n[!] Ошибка: Пароль пользователя root для MySQL не указан. Выход."
+    exit 1
+fi
+randdbpass=$(openssl rand -base64 8 | tr -dc 'a-zA-Z0-9' | head -c 10)
+randdbdb=$(pwgen -A 8 1)
+randdbname=$(openssl rand -base64 8 | tr -dc 'a-zA-Z0-9' | head -c 4)
+dbname="Proxygram_${randdbpass}"
 
 read -p "[+] Введите пароль для пользователя базы данных MySQL (по умолчанию: $randdbpass): " dbpass
 dbpass="${dbpass:-$randdbpass}"
@@ -202,11 +228,11 @@ sudo mysql -u root -p"$ROOT_PASSWORD" -e "GRANT ALL PRIVILEGES ON $randdbdb.* TO
 sudo mysql -u root -p"$ROOT_PASSWORD" -e "GRANT ALL PRIVILEGES ON $randdbdb.* TO '$dbuser'@'%';"
 sudo mysql -u root -p"$ROOT_PASSWORD" -e "FLUSH PRIVILEGES;"
 
+
 # Уведомление пользователя об успешном создании базы данных
 colorized_echo green "\n[+] База данных MySQL '$randdbdb' и пользователь '$dbuser' успешно созданы для вашего бота!"
 
 wait
-
 
 # получить информацию о боте и пользователе !
 printf "\n\e[33m[+] \e[36mТокен бота: \033[0m"
@@ -255,8 +281,8 @@ sleep 2
 
 # процесс curl
 colorized_echo blue "Статус базы данных:"
-curl --location "https://${DOMAIN}/Proxygram-bot/sql/sql.php?db_password=${dbpass}&db_name=${dbname}&db_username=${dbuser}"
-curl --location "https://${DOMAIN}/Proxygram-bot/sql/sql.php?db_password=${dbpass}&db_name=${dbname}&db_username=${dbuser}"
+curl --location "https://${DOMAIN}/Proxygram/sql/sql.php?db_password=${dbpass}&db_name=${dbname}&db_username=${dbuser}"
+curl --location "https://${DOMAIN}/Proxygram/sql/sql.php?db_password=${dbpass}&db_name=${dbname}&db_username=${dbuser}"
 
 # Проверка наличия всех переменных перед использованием в запросах curl
 if [ -z "$TOKEN" ] || [ -z "$DOMAIN" ] || [ -z "$CHAT_ID" ]; then
@@ -265,8 +291,8 @@ if [ -z "$TOKEN" ] || [ -z "$DOMAIN" ] || [ -z "$CHAT_ID" ]; then
 fi
 
 colorized_echo blue "\n\nСтатус Webhook:"
-curl -F "url=https://${DOMAIN}/Proxygram-bot/index.php" "https://api.telegram.org/bot${TOKEN}/setWebhook"
-curl -F "url=https://${DOMAIN}/Proxygram-bot/index.php" "https://api.telegram.org/bot${TOKEN}/setWebhook"
+curl -F "url=https://${DOMAIN}/Proxygram/index.php" "https://api.telegram.org/bot${TOKEN}/setWebhook"
+curl -F "url=https://${DOMAIN}/Proxygram/index.php" "https://api.telegram.org/bot${TOKEN}/setWebhook"
 
 colorized_echo blue "\n\nСтатус отправки сообщения:"
 TEXT_MESSAGE="✅ Робот PROXYGRAM успешно установлен!"
@@ -278,5 +304,4 @@ sleep 1
 colorized_echo green "[+] Робот PROXYGRAM успешно установлен"
 colorized_echo green "[+] Канал в Telegram: @ProxygramHUB || Бот в Telegram: @ProxygramCA_bot"
 colorized_echo green "[+] Робот PROXYGRAM успешно установлен"
-colorized_echo green "[+] Канал в Telegram: @ProxygramHUB || Бот в Telegram: @ProxygramCA_bot"
 echo -e "\n"
