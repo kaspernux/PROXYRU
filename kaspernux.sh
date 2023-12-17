@@ -211,9 +211,11 @@ randdbpass=$(openssl rand -base64 16 | tr -d '/+=\n' | head -c 16)
 randdbdb="Proxygram_$(openssl rand -base64 8 | tr -d '/+=\n' | head -c 8)"
 dbuser_default="mysqluser_$(openssl rand -base64 8 | tr -d '/+=\n' | head -c 8)"
 
-# Запрос имени пользователя и пароля для MySQL
-read -p "[+] Введите имя пользователя базы данных MySQL (по умолчанию: $dbuser): " dbuser
-dbuser="${dbuser:-$dbuser}"
+read -p "[+] Введите имя [root (MySql)] пользователя базы данных MySQL: " ROOT_PASSWORD
+randdbpass=$(openssl rand -base64 8 | tr -dc 'a-zA-Z0-9' | head -c 10)
+randdbdb=$(pwgen -A 8 1)
+randdbname=$(openssl rand -base64 8 | tr -dc 'a-zA-Z0-9' | head -c 4)
+dbname="Proxygram_${randdbpass}"
 
 read -p "[+] Введите пароль для пользователя базы данных MySQL (по умолчанию: $randdbpass): " dbpass
 dbpass="${dbpass:-$randdbpass}"
