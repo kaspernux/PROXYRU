@@ -138,6 +138,8 @@ read -p "[+] Введите домен без [http:// | https://]: " domain
 if [ -z "$domain" ]; then
     echo -e "[!] Ошибка: Домен не указан. Выход."
     exit 1
+else
+    DOMAIN="$domain"
 fi
 
 # Информирование пользователя и ожидание
