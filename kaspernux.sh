@@ -208,7 +208,10 @@ randdbpass=$(openssl rand -base64 16 | tr -d '/+=\n' | head -c 16)
 randdbdb="Proxygram_$(openssl rand -base64 8 | tr -d '/+=\n' | head -c 8)"
 dbuser_default="mysqluser_$(openssl rand -base64 8 | tr -d '/+=\n' | head -c 8)"
 
-read -p "[+] Введите имя [root (MySql)] пользователя базы данных MySQL: " ROOT_PASSWORD
+if [ -z "$ROOT_PASSWORD" ]; then
+    echo -e "\n[!] Ошибка: Пароль пользователя root для MySQL не указан. Выход."
+    exit 1
+fi
 randdbpass=$(openssl rand -base64 8 | tr -dc 'a-zA-Z0-9' | head -c 10)
 randdbdb=$(pwgen -A 8 1)
 randdbname=$(openssl rand -base64 8 | tr -dc 'a-zA-Z0-9' | head -c 4)
