@@ -2677,7 +2677,7 @@ elseif ($data == 'change_status_auth_all_country') {
 }
 
 /**
-* Project name: PROXYRU
+* Project name: PROXYGRAM
 * Channel: @Proxygram
 * Bot: @Proxygram_bot
 * Support: @Proxygram_Supp

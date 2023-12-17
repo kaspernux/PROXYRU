@@ -3,9 +3,6 @@
 # Написано: PROXYGRAM
 # Канал: @ProxygramHUB
 # Бот: @ProxygramCA_bot
-# Написано: PROXYGRAM
-# Канал: @ProxygramHUB
-# Бот: @ProxygramCA_bot
 
 if [ "$(id -u)" -ne 0 ]; then
     echo -e "\033[33mПожалуйста, запустите от имени root\033[0m"
@@ -37,7 +34,7 @@ colorized_echo() {
     esac
 }
 
-colorized_echo green "\n[+] - Подождите несколько часов, устанавливается PROXYGRAM
+colorized_echo green "\n[+] - Подождите несколько часов, устанавливается робот панели пчёл. . ."
 
 # процесс обновления !
 sudo apt update && apt upgrade -y
@@ -74,10 +71,7 @@ for i in "${PACKAGES[@]}"
 
 # установка еще !
 echo 'phpmyadmin phpmyadmin/app-password-confirm password Proxygram' | debconf-set-selections
-echo 'phpmyadmin phpmyadmin/app-password-confirm password Proxygram' | debconf-set-selections
 echo 'phpmyadmin phpmyadmin/reconfigure-webserver multiselect apache2' | debconf-set-selections
-echo 'phpmyadmin phpmyadmin/mysql/admin-pass password Proxygram' | debconf-set-selections
-echo 'phpmyadmin phpmyadmin/mysql/app-pass password Proxygram' | debconf-set-selections
 echo 'phpmyadmin phpmyadmin/mysql/admin-pass password Proxygram' | debconf-set-selections
 echo 'phpmyadmin phpmyadmin/mysql/app-pass password Proxygram' | debconf-set-selections
 echo 'phpmyadmin phpmyadmin/dbconfig-install boolean true' | debconf-set-selections
@@ -129,9 +123,6 @@ echo -e " \n"
 echo -e "\n[+] Настройка SSL/TLS для вашего домена\n"
 
 # Запрос пользователя для указания домена
-echo -e "\n[+] Настройка SSL/TLS для вашего домена\n"
-
-# Запрос пользователя для указания домена
 read -p "[+] Введите домен без [http:// | https://]: " domain
 
 # Проверка наличия указанного домена
@@ -148,18 +139,8 @@ echo -e "[+] Пожалуйста, подождите!"
 sleep 2
 
 # Разрешение портов 80 и 443 через UFW
-# Информирование пользователя и ожидание
-echo -e "\n[+] Хорошо, продолжаем..."
-echo -e "[+] Пожалуйста, подождите!"
-sleep 2
-
-# Разрешение портов 80 и 443 через UFW
 sudo ufw allow 80
 sudo ufw allow 443 
-
-# Установка необходимых пакетов
-sudo apt-get update
-sudo apt-get -y install letsencrypt
 
 # Установка необходимых пакетов
 sudo apt-get update
@@ -170,13 +151,10 @@ sudo apt-get -y install certbot python3-certbot-apache
 sudo systemctl enable certbot.timer
 
 # Получение SSL/TLS-сертификата с использованием certbot
-sudo certbot certonly --standalone --agree-tos --preferred-challenges http -d $domain
+sudo certbot certonly --standalone --agree-tos --preferred-challenges http -d $DOMAIN
 
 # Настройка Apache с использованием полученного сертификата
-sudo certbot certonly --standalone --agree-tos --preferred-challenges http -d $domain
-
-# Настройка Apache с использованием полученного сертификата
-sudo certbot --apache --agree-tos --preferred-challenges http -d $domain
+sudo certbot --apache --agree-tos --preferred-challenges http -d $DOMAIN
 
 # Очистка экрана для чистого вывода
 clear
@@ -190,39 +168,30 @@ if [ $? -eq 0 ]; then
     colorized_echo yellow "MySQL уже установлен на вашем сервере."
 else
     # Запрос пароля пользователя root для MySQL
-    read -s -p "[+] Введите пароль пользователя root MySQL : " ROOT_PASSWORD
+    read -s -p "[+] Введите пароль пользователя root MySQL: " ROOT_PASSWORD
     echo
 
     # Установка MySQL
     sudo apt-get install mysql-server -y
 fi
 
-
 # Генерация безопасных случайных значений
 randdbpass=$(openssl rand -base64 16 | tr -d '/+=\n' | head -c 16)
 randdbdb="Proxygram_$(openssl rand -base64 8 | tr -d '/+=\n' | head -c 8)"
 dbuser_default="mysqluser_$(openssl rand -base64 8 | tr -d '/+=\n' | head -c 8)"
 
-if [ -z "$ROOT_PASSWORD" ]; then
-    echo -e "\n[!] Ошибка: Пароль пользователя root для MySQL не указан. Выход."
-    exit 1
-fi
-randdbpass=$(openssl rand -base64 8 | tr -dc 'a-zA-Z0-9' | head -c 10)
-randdbdb=$(pwgen -A 8 1)
-randdbname=$(openssl rand -base64 8 | tr -dc 'a-zA-Z0-9' | head -c 4)
-dbname="Proxygram_${randdbpass}"
+# Запрос имени пользователя и пароля для MySQL
+read -p "[+] Введите имя пользователя базы данных MySQL (по умолчанию: $dbuser_default): " dbuser
+dbuser="${dbuser:-$dbuser_default}"
 
 read -p "[+] Введите пароль для пользователя базы данных MySQL (по умолчанию: $randdbpass): " dbpass
 dbpass="${dbpass:-$randdbpass}"
 
 # Создание базы данных и пользователя MySQL
 sudo mysql -u root -p"$ROOT_PASSWORD" -e "CREATE DATABASE IF NOT EXISTS $randdbdb;"
-sudo mysql -u root -p"$ROOT_PASSWORD" -e "CREATE USER IF NOT EXISTS '$dbuser'@'localhost' IDENTIFIED BY '$dbpass';"
 sudo mysql -u root -p"$ROOT_PASSWORD" -e "CREATE USER IF NOT EXISTS '$dbuser'@'%' IDENTIFIED BY '$dbpass';"
-sudo mysql -u root -p"$ROOT_PASSWORD" -e "GRANT ALL PRIVILEGES ON $randdbdb.* TO '$dbuser'@'localhost';"
 sudo mysql -u root -p"$ROOT_PASSWORD" -e "GRANT ALL PRIVILEGES ON $randdbdb.* TO '$dbuser'@'%';"
 sudo mysql -u root -p"$ROOT_PASSWORD" -e "FLUSH PRIVILEGES;"
-
 
 # Уведомление пользователя об успешном создании базы данных
 colorized_echo green "\n[+] База данных MySQL '$randdbdb' и пользователь '$dbuser' успешно созданы для вашего бота!"
@@ -277,20 +246,11 @@ sleep 2
 # процесс curl
 colorized_echo blue "Статус базы данных:"
 curl --location "https://${DOMAIN}/Proxygram/sql/sql.php?db_password=${dbpass}&db_name=${dbname}&db_username=${dbuser}"
-curl --location "https://${DOMAIN}/Proxygram/sql/sql.php?db_password=${dbpass}&db_name=${dbname}&db_username=${dbuser}"
-
-# Проверка наличия всех переменных перед использованием в запросах curl
-if [ -z "$TOKEN" ] || [ -z "$DOMAIN" ] || [ -z "$CHAT_ID" ]; then
-    colorized_echo red "Неверный ввод!"
-    exit 1
-fi
 
 colorized_echo blue "\n\nСтатус Webhook:"
 curl -F "url=https://${DOMAIN}/Proxygram/index.php" "https://api.telegram.org/bot${TOKEN}/setWebhook"
-curl -F "url=https://${DOMAIN}/Proxygram/index.php" "https://api.telegram.org/bot${TOKEN}/setWebhook"
 
 colorized_echo blue "\n\nСтатус отправки сообщения:"
-TEXT_MESSAGE="✅ Робот PROXYGRAM успешно установлен!"
 TEXT_MESSAGE="✅ Робот PROXYGRAM успешно установлен!"
 curl -s -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" -d chat_id="${CHAT_ID}" -d text="${TEXT_MESSAGE}"
 echo -e "\n\n"
@@ -298,5 +258,4 @@ echo -e "\n\n"
 sleep 1
 colorized_echo green "[+] Робот PROXYGRAM успешно установлен"
 colorized_echo green "[+] Канал в Telegram: @ProxygramHUB || Бот в Telegram: @ProxygramCA_bot"
-colorized_echo green "[+] Робот PROXYGRAM успешно установлен"
 echo -e "\n"
