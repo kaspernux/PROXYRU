@@ -195,7 +195,7 @@ if [ $? -eq 0 ]; then
     colorized_echo yellow "MySQL уже установлен на вашем сервере."
 else
     # Запрос пароля пользователя root для MySQL
-    read -s -p "[+] Введите пароль пользователя root MySQL : " ROOT_PASSWORD
+    read -s -p "[+] Введите пароль пользователя root MySQL : " $ROOT_PASSWORD
     echo
 
     # Установка MySQL
