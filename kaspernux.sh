@@ -138,11 +138,6 @@ read -p "[+] Введите домен без [http:// | https://]: " domain
 if [ -z "$domain" ]; then
     echo -e "[!] Ошибка: Домен не указан. Выход."
     exit 1
-
-# Проверка наличия указанного домена
-if [ -z "$domain" ]; then
-    echo -e "[!] Ошибка: Домен не указан. Выход."
-    exit 1
 fi
 
 # Информирование пользователя и ожидание
@@ -173,15 +168,13 @@ sudo apt-get -y install certbot python3-certbot-apache
 sudo systemctl enable certbot.timer
 
 # Получение SSL/TLS-сертификата с использованием certbot
-sudo certbot certonly --standalone --agree-tos --preferred-challenges http -d $DOMAIN
+sudo certbot certonly --standalone --agree-tos --preferred-challenges http -d $domain
 
 # Настройка Apache с использованием полученного сертификата
+sudo certbot certonly --standalone --agree-tos --preferred-challenges http -d $domain
 
 # Настройка Apache с использованием полученного сертификата
-sudo certbot certonly --standalone --agree-tos --preferred-challenges http -d $DOMAIN
-
-# Настройка Apache с использованием полученного сертификата
-sudo certbot --apache --agree-tos --preferred-challenges http -d $DOMAIN
+sudo certbot --apache --agree-tos --preferred-challenges http -d $domain
 
 # Очистка экрана для чистого вывода
 clear
