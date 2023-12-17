@@ -129,15 +129,7 @@ echo -e " \n"
 echo -e "\n[+] Настройка SSL/TLS для вашего домена\n"
 
 # Запрос пользователя для указания домена
-echo -e "\n[+] Настройка SSL/TLS для вашего домена\n"
-
-# Запрос пользователя для указания домена
 read -p "[+] Введите домен без [http:// | https://]: " domain
-
-# Проверка наличия указанного домена
-if [ -z "$domain" ]; then
-    echo -e "[!] Ошибка: Домен не указан. Выход."
-    exit 1
 
 # Проверка наличия указанного домена
 if [ -z "$domain" ]; then
@@ -151,37 +143,25 @@ echo -e "[+] Пожалуйста, подождите!"
 sleep 2
 
 # Разрешение портов 80 и 443 через UFW
-# Информирование пользователя и ожидание
 echo -e "\n[+] Хорошо, продолжаем..."
 echo -e "[+] Пожалуйста, подождите!"
 sleep 2
 
-# Разрешение портов 80 и 443 через UFW
 sudo ufw allow 80
-sudo ufw allow 443 
+sudo ufw allow 443
 
 # Установка необходимых пакетов
 sudo apt-get update
-sudo apt-get -y install letsencrypt
-
-# Установка необходимых пакетов
-sudo apt-get update
-sudo apt-get -y install letsencrypt
-sudo apt-get -y install certbot python3-certbot-apache
+sudo apt-get -y install letsencrypt certbot python3-certbot-apache
 
 # Включение таймера certbot для автоматического обновления
 sudo systemctl enable certbot.timer
 
 # Получение SSL/TLS-сертификата с использованием certbot
-sudo certbot certonly --standalone --agree-tos --preferred-challenges http -d $DOMAIN
+sudo certbot certonly --standalone --agree-tos --preferred-challenges http -d $domain
 
 # Настройка Apache с использованием полученного сертификата
-
-# Настройка Apache с использованием полученного сертификата
-sudo certbot certonly --standalone --agree-tos --preferred-challenges http -d $DOMAIN
-
-# Настройка Apache с использованием полученного сертификата
-sudo certbot --apache --agree-tos --preferred-challenges http -d $DOMAIN
+sudo certbot --apache --agree-tos --preferred-challenges http -d $domain
 
 # Очистка экрана для чистого вывода
 clear
@@ -195,13 +175,12 @@ if [ $? -eq 0 ]; then
     colorized_echo yellow "MySQL уже установлен на вашем сервере."
 else
     # Запрос пароля пользователя root для MySQL
-    read -s -p "[+] Введите пароль пользователя root MySQL : " $ROOT_PASSWORD
+    read -s -p "[+] Введите пароль пользователя root MySQL : " ROOT_PASSWORD
     echo
 
     # Установка MySQL
     sudo apt-get install mysql-server -y
 fi
-
 
 # Генерация безопасных случайных значений
 randdbpass=$(openssl rand -base64 16 | tr -d '/+=\n' | head -c 16)
@@ -223,11 +202,11 @@ sudo mysql -u root -p"$ROOT_PASSWORD" -e "GRANT ALL PRIVILEGES ON $randdbdb.* TO
 sudo mysql -u root -p"$ROOT_PASSWORD" -e "GRANT ALL PRIVILEGES ON $randdbdb.* TO '$dbuser'@'%';"
 sudo mysql -u root -p"$ROOT_PASSWORD" -e "FLUSH PRIVILEGES;"
 
-
 # Уведомление пользователя об успешном создании базы данных
 colorized_echo green "\n[+] База данных MySQL '$randdbdb' и пользователь '$dbuser' успешно созданы для вашего бота!"
 
 wait
+
 
 # получить информацию о боте и пользователе !
 printf "\n\e[33m[+] \e[36mТокен бота: \033[0m"
