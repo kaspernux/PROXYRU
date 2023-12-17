@@ -143,8 +143,6 @@ if [ -z "$domain" ]; then
 if [ -z "$domain" ]; then
     echo -e "[!] Ошибка: Домен не указан. Выход."
     exit 1
-else
-    DOMAIN="$domain"
 fi
 
 # Информирование пользователя и ожидание
@@ -172,11 +170,7 @@ sudo apt-get -y install letsencrypt
 sudo apt-get -y install certbot python3-certbot-apache
 
 # Включение таймера certbot для автоматического обновления
-
-# Включение таймера certbot для автоматического обновления
 sudo systemctl enable certbot.timer
-
-# Получение SSL/TLS-сертификата с использованием certbot
 
 # Получение SSL/TLS-сертификата с использованием certbot
 sudo certbot certonly --standalone --agree-tos --preferred-challenges http -d $DOMAIN
@@ -184,9 +178,11 @@ sudo certbot certonly --standalone --agree-tos --preferred-challenges http -d $D
 # Настройка Apache с использованием полученного сертификата
 
 # Настройка Apache с использованием полученного сертификата
+sudo certbot certonly --standalone --agree-tos --preferred-challenges http -d $DOMAIN
+
+# Настройка Apache с использованием полученного сертификата
 sudo certbot --apache --agree-tos --preferred-challenges http -d $DOMAIN
 
-# Очистка экрана для чистого вывода
 # Очистка экрана для чистого вывода
 clear
 echo -e " \n"
@@ -205,6 +201,7 @@ else
     # Установка MySQL
     sudo apt-get install mysql-server -y
 fi
+
 
 # Генерация безопасных случайных значений
 randdbpass=$(openssl rand -base64 16 | tr -d '/+=\n' | head -c 16)
@@ -281,6 +278,12 @@ sleep 2
 colorized_echo blue "Статус базы данных:"
 curl --location "https://${DOMAIN}/Proxygram-bot/sql/sql.php?db_password=${dbpass}&db_name=${dbname}&db_username=${dbuser}"
 curl --location "https://${DOMAIN}/Proxygram-bot/sql/sql.php?db_password=${dbpass}&db_name=${dbname}&db_username=${dbuser}"
+
+# Проверка наличия всех переменных перед использованием в запросах curl
+if [ -z "$TOKEN" ] || [ -z "$DOMAIN" ] || [ -z "$CHAT_ID" ]; then
+    colorized_echo red "Неверный ввод!"
+    exit 1
+fi
 
 colorized_echo blue "\n\nСтатус Webhook:"
 curl -F "url=https://${DOMAIN}/Proxygram-bot/index.php" "https://api.telegram.org/bot${TOKEN}/setWebhook"
