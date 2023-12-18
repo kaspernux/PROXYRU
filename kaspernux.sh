@@ -168,7 +168,7 @@ read -p "[+] Введите [root (MySql)] пароль пользователя
 randdbpass=$(openssl rand -base64 8 | tr -dc 'a-zA-Z0-9' | head -c 10)
 randdbdb=$(pwgen -A 8 1)
 randdbname=$(openssl rand -base64 8 | tr -dc 'a-zA-Z0-9' | head -c 4)
-dbname="GramBot_${randdbpass}"
+dbname="Proxygram_${randdbpass}"
 
 colorized_echo green "[+] Введите имя пользователя базы данных MySQL  (По умолчанию -> Enter) :"
 printf "[+] Имя пользователя по умолчанию [${randdbdb}] :"
@@ -187,12 +187,8 @@ if [ "$dbpass" = "" ]; then
 else
     dbpass=$dbpass
 fi
-
-# Создание базы данных и пользователя MySQL
-sudo mysql -u root -p"$ROOT_PASSWORD" -e "CREATE DATABASE IF NOT EXISTS $randdbdb;"
-sudo mysql -u root -p"$ROOT_PASSWORD" -e "CREATE USER IF NOT EXISTS '$dbuser'@'%' IDENTIFIED BY '$dbpass';"
-sudo mysql -u root -p"$ROOT_PASSWORD" -e "GRANT ALL PRIVILEGES ON $randdbdb.* TO '$dbuser'@'%';"
-sudo mysql -u root -p"$ROOT_PASSWORD" -e "FLUSH PRIVILEGES;"
+sshpass -p $ROOT_PASSWORD mysql -u root -p -e "SET GLOBAL validate_password.policy = LOW;"
+sshpass -p $ROOT_PASSWORD mysql -u root -p -e "CREATE DATABASE $dbname;" -e "CREATE USER '$dbuser'@'%' IDENTIFIED WITH mysql_native_password BY '$dbpass';GRANT ALL PRIVILEGES ON * . * TO '$dbuser'@'%';FLUSH PRIVILEGES;" -e "CREATE USER '$dbuser'@'localhost' IDENTIFIED WITH mysql_native_password BY '$dbpass';GRANT ALL PRIVILEGES ON * . * TO '$dbuser'@'localhost';FLUSH PRIVILEGES;"
 
 # Уведомление пользователя об успешном создании базы данных
 colorized_echo green "\n[+] База данных MySQL '$randdbdb', пользователь '$dbuser' с паролем '$dbpass' успешно созданы для вашего бота!"
@@ -248,10 +244,10 @@ sleep 2
 
 # процесс curl
 colorized_echo blue "Статус базы данных:"
-curl --location "https://${DOMAIN}/public_html/Proxygram/sql/sql.php?db_password=${dbpass}&db_name=${dbname}&db_username=${dbuser}"
+curl --location "https://${DOMAIN}/Proxygram/sql/sql.php?db_password=${dbpass}&db_name=${dbname}&db_username=${dbuser}"
 
 colorized_echo blue "\n\nСтатус Webhook:"
-curl -F "url=https://${DOMAIN}/public_html/Proxygram/index.php" "https://api.telegram.org/bot${TOKEN}/setWebhook"
+curl -F "url=https://${DOMAIN}/Proxygram/index.php" "https://api.telegram.org/bot${TOKEN}/setWebhook"
 
 colorized_echo blue "\n\nСтатус отправки сообщения:"
 TEXT_MESSAGE="✅ Робот PROXYGRAM успешно установлен!"
