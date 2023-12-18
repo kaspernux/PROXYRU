@@ -165,7 +165,7 @@ elseif($user['step'] == 'confirm_service' and $text == '☑️ Создание 
     }
     # ---------------- create service proccess ---------------- #
     if ($panel['type'] == 'marzban') {
-        # ---------------- set proxies and inbounds proccess for marzban panel ---------------- #
+        # ---------------- настроить прокси и входящие процессы для панели marzban ---------------- #
         $protocols = explode('|', $panel['protocols']);
         unset($protocols[count($protocols)-1]);
         if ($protocols[0] == '') unset($protocols[0]);
@@ -206,7 +206,7 @@ elseif($user['step'] == 'confirm_service' and $text == '☑️ Создание 
             } else {
                 sendmessage($from_id, sprintf($texts['success_create_service'], $name, $location, $date, $limit, number_format($price), $subscribe, '@' . $getMe['result']['username']), $start_key);
             }
-            $sql->query("INSERT INTO `orders` (`from_id`, `location`, `protocol`, `date`, `volume`, `link`, `price`, `code`, `status`, `type`) VALUES ('$from_id', '$location', 'null', '$date', '$limit', '$links', '$price', '$code', 'active', 'marzban')");
+            $sql->query("INSERT INTO `orders` (`from_id`, `location`, `protocol`, `date`, `volume`, `link`, `price`, `code`, `status`, `type`) VALUES ('$from_id', '$location', 'null', '$date', '$limit', '$links', '$price', '$code', 'активен', 'marzban')");
             // sendmessage($config['dev'], sprintf($texts['success_create_notif']), $first_name, $username, $from_id, $user['count_service'], $user['coin'], $location, $plan, $limit, $date, $code, number_format($price));
         }else{
             sendmessage($from_id, sprintf($texts['create_error'], 2), $start_key);
@@ -256,8 +256,8 @@ elseif ($text == '🎁 Бесплатный тестовый сервис' && $t
         
         try {
             if ($panel_fetch['type'] == 'marzban') {
-                # ---------------- set proxies and inbounds proccess for marzban panel ---------------- #
-                $protocols = explode('|', $panel_fetch['protocols']);
+			# ---------------- установка прокси и входящих процессов для панели marzban ---------------- #
+            $protocols = explode('|', $panel_fetch['protocols']);
                 unset($protocols[count($protocols)-1]);
                 if ($protocols[0] == '') unset($protocols[0]);
                 $proxies = array();
@@ -361,8 +361,9 @@ elseif (strpos($data, 'service_status-') !== false) {
             $note = $sql->query("SELECT * FROM `notes` WHERE `code` = '$code'");
 
             $manage_service_btns = json_encode(['inline_keyboard' => [    
+                    // [['text' => 'Текст', 'callback_data' => 'access_settings-'.$code.'-marzban']],
                     [["text" => "Покупка дополнительного объема", "callback_data" => "buy_extra_volume-" . $code . "-marzban"],
-                    ["text" => "Увеличение времени", "callback_data" => "buy_extra_time-" . $code . "-marzban"]],
+                    ["text" => "Купить дополнительный объем", "callback_data" => "buy_extra_time-" . $code . "-marzban"]],
                     [["text" => "Написать заметку", "callback_data" => "write_note-" . $code . "-marzban"],
                     ["text" => "Получить QR-код", "callback_data" => "getQrCode-" . $code . "-marzban"]],
                     [["text" => "🔙 Назад", "callback_data" => "back_services"]]]
@@ -557,7 +558,7 @@ elseif (strpos($data, 'confirm_extra_time') !== false) {
                 $response = $xui->addExpire(base64_encode($service_code) . '_' . $from_id, $plan['date'], $panel_setting['inbound_id']);
                 // sendMessage($from_id, $response);
             } else {
-                alert('❌ Error --> not found service');
+                alert('❌  Ошибка --> сервис не найден');
             }
         }
 
