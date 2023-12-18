@@ -111,8 +111,8 @@ sudo systemctl restart apache2.service
 
 wait
 
-git clone https://github.com/kaspernux/PROXYRU.git /home/grambot/web/tg.proxygram.io/Proxygram
-sudo chmod -R 777 /home/grambot/web/tg.proxygram.io/Proxygram
+git clone https://github.com/kaspernux/PROXYRU.git /home/grambot/web/tg.proxygram.io/public_html/Proxygram
+sudo chmod -R 777 /home/grambot/web/tg.proxygram.io/public_html/Proxygram
 colorized_echo green "\n\tВсе файлы/папки робота PROXYGRAM успешно установлены на вашем сервере!"
 
 wait
@@ -178,11 +178,11 @@ fi
 # Генерация безопасных случайных значений
 randdbpass=$(openssl rand -base64 16 | tr -d '/+=\n' | head -c 16)
 randdbdb="Proxygram_$(openssl rand -base64 8 | tr -d '/+=\n' | head -c 8)"
-dbuser_default="mysqluser_$(openssl rand -base64 8 | tr -d '/+=\n' | head -c 8)"
+dbuser="mysqluser_$(openssl rand -base64 8 | tr -d '/+=\n' | head -c 8)"
 
 # Запрос имени пользователя и пароля для MySQL
-read -p "[+] Введите имя пользователя базы данных MySQL (по умолчанию: $dbuser_default): " dbuser
-dbuser="${dbuser:-$dbuser_default}"
+read -p "[+] Введите имя пользователя базы данных MySQL (по умолчанию: $dbuser): " dbuser
+dbuser="${dbuser:-$dbuser}"
 
 read -p "[+] Введите пароль для пользователя базы данных MySQL (по умолчанию: $randdbpass): " dbpass
 dbpass="${dbpass:-$randdbpass}"
@@ -194,7 +194,9 @@ sudo mysql -u root -p"$ROOT_PASSWORD" -e "GRANT ALL PRIVILEGES ON $randdbdb.* TO
 sudo mysql -u root -p"$ROOT_PASSWORD" -e "FLUSH PRIVILEGES;"
 
 # Уведомление пользователя об успешном создании базы данных
-colorized_echo green "\n[+] База данных MySQL '$randdbdb' и пользователь '$dbuser' успешно созданы для вашего бота!"
+colorized_echo green "\n[+] База данных MySQL '$randdbdb', пользователь '$dbuser' с паролем '$dbpass' успешно созданы для вашего бота!"
+colorized_echo green "\n[+] ВАЖНО !!! Зампомните эти данные для настройки Бота !"
+
 
 wait
 
@@ -220,7 +222,7 @@ fi
 wait
 sleep 2
 
-config_address="/home/grambot/web/tg.proxygram.io/Proxygram/install/kaspernux.install"
+config_address="/home/grambot/web/tg.proxygram.io/public_html/Proxygram/install/kaspernux.install"
 
 if [ -f "$config_address" ]; then
     rm "$config_address"
@@ -232,11 +234,11 @@ colorized_echo green "[+] Пожалуйста, подождите . . .\n"
 sleep 1
 
 # добавить информацию в файл
-# touch('/home/grambot/web/tg.proxygram.io/Proxygram/install/kaspernux.install')
-echo "{\"development\":\"@Proxygram\",\"install_location\":\"server\",\"main_domin\":\"${DOMAIN}\",\"token\":\"${TOKEN}\",\"dev\":\"${CHAT_ID}\",\"db_name\":\"${dbname}\",\"db_username\":\"${randdbdb}\",\"db_password\":\"${randdbpass}\"}" > /home/grambot/web/tg.proxygram.io/Proxygram/install/kaspernux.install
+# touch('/home/grambot/web/tg.proxygram.io/public_html/Proxygram/install/kaspernux.install')
+echo "{\"development\":\"@Proxygram\",\"install_location\":\"server\",\"main_domin\":\"${DOMAIN}\",\"token\":\"${TOKEN}\",\"dev\":\"${CHAT_ID}\",\"db_name\":\"${dbname}\",\"db_username\":\"${randdbdb}\",\"db_password\":\"${randdbpass}\"}" > /home/grambot/web/tg.proxygram.io/public_html/Proxygram/install/kaspernux.install
 
-source_file="/home/grambot/web/tg.proxygram.io/Proxygram/config.php"
-destination_file="/home/grambot/web/tg.proxygram.io/Proxygram/config.php.tmp"
+source_file="/home/grambot/web/tg.proxygram.io/public_html/Proxygram/config.php"
+destination_file="/home/grambot/web/tg.proxygram.io/public_html/Proxygram/config.php.tmp"
 replace=$(cat "$source_file" | sed -e "s/\[\*TOKEN\*\]/${TOKEN}/g" -e "s/\[\*DEV\*\]/${CHAT_ID}/g" -e "s/\[\*DB-NAME\*\]/${dbname}/g" -e "s/\[\*DB-USER\*\]/${dbuser}/g" -e "s/\[\*DB-PASS\*\]/${dbpass}/g")
 echo "$replace" > "$destination_file"
 mv "$destination_file" "$source_file"
@@ -245,10 +247,10 @@ sleep 2
 
 # процесс curl
 colorized_echo blue "Статус базы данных:"
-curl --location "https://${DOMAIN}/Proxygram/sql/sql.php?db_password=${dbpass}&db_name=${dbname}&db_username=${dbuser}"
+curl --location "https://${DOMAIN}/public_html/Proxygram/sql/sql.php?db_password=${dbpass}&db_name=${dbname}&db_username=${dbuser}"
 
 colorized_echo blue "\n\nСтатус Webhook:"
-curl -F "url=https://${DOMAIN}/Proxygram/index.php" "https://api.telegram.org/bot${TOKEN}/setWebhook"
+curl -F "url=https://${DOMAIN}/public_html/Proxygram/index.php" "https://api.telegram.org/bot${TOKEN}/setWebhook"
 
 colorized_echo blue "\n\nСтатус отправки сообщения:"
 TEXT_MESSAGE="✅ Робот PROXYGRAM успешно установлен!"
