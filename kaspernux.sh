@@ -162,36 +162,34 @@ echo -e " \n"
 
 wait
 
-# Проверка, установлен ли MySQL
-dpkg -s mysql-server &> /dev/null
-if [ $? -eq 0 ]; then
-    colorized_echo yellow "MySQL уже установлен на вашем сервере."
-else
-    # Запрос пароля пользователя root для MySQL
-    read -s -p "[+] Введите пароль пользователя root MySQL: " ROOT_PASSWORD
-    echo
-
-    # Установка MySQL
-    sudo apt-get install mysql-server -y
-fi
+read -p "[+] Введите [root (MySql)] пароль пользователя: " ROOT_PASSWORD
 
 # Генерация безопасных случайных значений
-randdbpass=$(openssl rand -base64 16 | tr -d '/+=\n' | head -c 16)
-randdbdb="Proxygram_$(openssl rand -base64 8 | tr -d '/+=\n' | head -c 8)"
-dbuser="mysqluser_$(openssl rand -base64 8 | tr -d '/+=\n' | head -c 8)"
+randdbpass=$(openssl rand -base64 8 | tr -dc 'a-zA-Z0-9' | head -c 10)
+randdbdb=$(pwgen -A 8 1)
+randdbname=$(openssl rand -base64 8 | tr -dc 'a-zA-Z0-9' | head -c 4)
+dbname="GramBot_${randdbpass}"
 
-# Запрос имени пользователя и пароля для MySQL
-read -p "[+] Введите имя пользователя базы данных MySQL (по умолчанию: $dbuser): " dbuser
-dbuser="${dbuser:-$dbuser}"
+colorized_echo green "[+] Введите имя пользователя базы данных MySQL  (По умолчанию -> Enter) :"
+printf "[+] Имя пользователя по умолчанию [${randdbdb}] :"
+read dbuser
+if [ "$dbuser" = "" ]; then
+    dbuser=$randdbdb
+else
+    dbuser=$dbuser
+fi
 
-read -p "[+] Введите пароль для пользователя базы данных MySQL (по умолчанию: $randdbpass): " dbpass
-dbpass="${dbpass:-$randdbpass}"
+colorized_echo green "[+] Введите пароль для пользователя базы данных MySQL (по умолчанию: -> Enter) :"
+printf "[+] Пароль по умолчанию [${randdbpass}] :"
+read dbpass
+if [ "$dbpass" = "" ]; then
+    dbpass=$randdbpass
+else
+    dbpass=$dbpass
+fi
 
-# Создание базы данных и пользователя MySQL
-sudo mysql -u root -p"$ROOT_PASSWORD" -e "CREATE DATABASE IF NOT EXISTS $randdbdb;"
-sudo mysql -u root -p"$ROOT_PASSWORD" -e "CREATE USER IF NOT EXISTS '$dbuser'@'%' IDENTIFIED BY '$dbpass';"
-sudo mysql -u root -p"$ROOT_PASSWORD" -e "GRANT ALL PRIVILEGES ON $randdbdb.* TO '$dbuser'@'%';"
-sudo mysql -u root -p"$ROOT_PASSWORD" -e "FLUSH PRIVILEGES;"
+sshpass -p $ROOT_PASSWORD mysql -u root -p -e "SET GLOBAL validate_password.policy = LOW;"
+sshpass -p $ROOT_PASSWORD mysql -u root -p -e "CREATE DATABASE $dbname;" -e "CREATE USER '$dbuser'@'%' IDENTIFIED WITH mysql_native_password BY '$dbpass';GRANT ALL PRIVILEGES ON * . * TO '$dbuser'@'%';FLUSH PRIVILEGES;" -e "CREATE USER '$dbuser'@'localhost' IDENTIFIED WITH mysql_native_password BY '$dbpass';GRANT ALL PRIVILEGES ON * . * TO '$dbuser'@'localhost';FLUSH PRIVILEGES;"
 
 # Уведомление пользователя об успешном создании базы данных
 colorized_echo green "\n[+] База данных MySQL '$randdbdb', пользователь '$dbuser' с паролем '$dbpass' успешно созданы для вашего бота!"
