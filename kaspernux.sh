@@ -188,8 +188,11 @@ else
     dbpass=$dbpass
 fi
 
-sshpass -p $ROOT_PASSWORD mysql -u root -p -e "SET GLOBAL validate_password.policy = LOW;"
-sshpass -p $ROOT_PASSWORD mysql -u root -p -e "CREATE DATABASE $dbname;" -e "CREATE USER '$dbuser'@'%' IDENTIFIED WITH mysql_native_password BY '$dbpass';GRANT ALL PRIVILEGES ON * . * TO '$dbuser'@'%';FLUSH PRIVILEGES;" -e "CREATE USER '$dbuser'@'localhost' IDENTIFIED WITH mysql_native_password BY '$dbpass';GRANT ALL PRIVILEGES ON * . * TO '$dbuser'@'localhost';FLUSH PRIVILEGES;"
+# Создание базы данных и пользователя MySQL
+sudo mysql -u root -p"$ROOT_PASSWORD" -e "CREATE DATABASE IF NOT EXISTS $randdbdb;"
+sudo mysql -u root -p"$ROOT_PASSWORD" -e "CREATE USER IF NOT EXISTS '$dbuser'@'%' IDENTIFIED BY '$dbpass';"
+sudo mysql -u root -p"$ROOT_PASSWORD" -e "GRANT ALL PRIVILEGES ON $randdbdb.* TO '$dbuser'@'%';"
+sudo mysql -u root -p"$ROOT_PASSWORD" -e "FLUSH PRIVILEGES;"
 
 # Уведомление пользователя об успешном создании базы данных
 colorized_echo green "\n[+] База данных MySQL '$randdbdb', пользователь '$dbuser' с паролем '$dbpass' успешно созданы для вашего бота!"
