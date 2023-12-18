@@ -111,8 +111,8 @@ sudo systemctl restart apache2.service
 
 wait
 
-git clone https://github.com/kaspernux/PROXYRU.git /home/grambot/web/tg.proxygram.io/public_html/Proxygram
-sudo chmod -R 777 /home/grambot/web/tg.proxygram.io/public_html/Proxygram
+git clone https://github.com/kaspernux/PROXYRU.git /var/www/html/Proxygram
+sudo chmod -R 777 /var/www/html/Proxygram
 colorized_echo green "\n\tВсе файлы/папки робота PROXYGRAM успешно установлены на вашем сервере!"
 
 wait
@@ -223,7 +223,7 @@ fi
 wait
 sleep 2
 
-config_address="/home/grambot/web/tg.proxygram.io/public_html/Proxygram/install/kaspernux.install"
+config_address="/var/www/html/Proxygram/install/kaspernux.install"
 
 if [ -f "$config_address" ]; then
     rm "$config_address"
@@ -235,11 +235,11 @@ colorized_echo green "[+] Пожалуйста, подождите . . .\n"
 sleep 1
 
 # добавить информацию в файл
-# touch('/home/grambot/web/tg.proxygram.io/public_html/Proxygram/install/kaspernux.install')
-echo "{\"development\":\"@Proxygram\",\"install_location\":\"server\",\"main_domin\":\"${DOMAIN}\",\"token\":\"${TOKEN}\",\"dev\":\"${CHAT_ID}\",\"db_name\":\"${dbname}\",\"db_username\":\"${randdbdb}\",\"db_password\":\"${randdbpass}\"}" > /home/grambot/web/tg.proxygram.io/public_html/Proxygram/install/kaspernux.install
+# touch('/var/www/html/Proxygram/install/kaspernux.install')
+echo "{\"development\":\"@Proxygram\",\"install_location\":\"server\",\"main_domin\":\"${DOMAIN}\",\"token\":\"${TOKEN}\",\"dev\":\"${CHAT_ID}\",\"db_name\":\"${dbname}\",\"db_username\":\"${randdbdb}\",\"db_password\":\"${randdbpass}\"}" > /var/www/html/Proxygram/install/kaspernux.install
 
-source_file="/home/grambot/web/tg.proxygram.io/public_html/Proxygram/config.php"
-destination_file="/home/grambot/web/tg.proxygram.io/public_html/Proxygram/config.php.tmp"
+source_file="/var/www/html/Proxygram/config.php"
+destination_file="/var/www/html/Proxygram/config.php.tmp"
 replace=$(cat "$source_file" | sed -e "s/\[\*TOKEN\*\]/${TOKEN}/g" -e "s/\[\*DEV\*\]/${CHAT_ID}/g" -e "s/\[\*DB-NAME\*\]/${dbname}/g" -e "s/\[\*DB-USER\*\]/${dbuser}/g" -e "s/\[\*DB-PASS\*\]/${dbpass}/g")
 echo "$replace" > "$destination_file"
 mv "$destination_file" "$source_file"

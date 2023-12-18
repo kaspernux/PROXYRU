@@ -48,9 +48,9 @@ do
             echo -e "\n"
             read -p "Вы уверены, что хотите обновить? [y/n] : " answer
             if [ "$answer" != "${answer#[Yy]}" ]; then
-                if [ -d "/home/grambot/web/tg.proxygram.io/public_html/Proxygram" ]; then
-                    if [ -f "/home/grambot/web/tg.proxygram.io/public_html/Proxygram/install/kaspernux.install" ]; then
-                        if [ -s "/home/grambot/web/tg.proxygram.io/public_html/Proxygram/install/kaspernux.install" ]; then
+                if [ -d "/var/www/html/Proxygram" ]; then
+                    if [ -f "/var/www/html/Proxygram/install/kaspernux.install" ]; then
+                        if [ -s "/var/www/html/Proxygram/install/kaspernux.install" ]; then
                             colorized_echo green "Пожалуйста, подождите, идет обновление. . ."
                             # процесс обновления!
                             sudo apt update && apt upgrade -y
@@ -58,17 +58,17 @@ do
                             sudo apt install curl -y
                             sudo apt install jq -y
                             sleep 2
-                            mv /home/grambot/web/tg.proxygram.io/public_html/Proxygram/install/kaspernux.install /home/grambot/web/tg.proxygram.io/public_html/kaspernux.install
+                            mv /var/www/html/Proxygram/install/kaspernux.install /var/www/html/kaspernux.install
                             sleep 1
-                            rm -r /home/grambot/web/tg.proxygram.io/public_html/Proxygram/
+                            rm -r /var/www/html/Proxygram/
                             colorized_echo green "\nВсе файлы и папки удалены для обновления бота. . .\n"
 
-                            git clone https://github.com/kaspernux/PROXYRU.git /home/grambot/web/tg.proxygram.io/public_html/Proxygram/
-                            sudo chmod -R 777 /home/grambot/web/tg.proxygram.io/public_html/Proxygram/
-                            mv /var/www/html/kaspernux.install /home/grambot/web/tg.proxygram.io/public_html/Proxygram/install/kaspernux.install
+                            git clone https://github.com/kaspernux/PROXYRU.git /var/www/html/Proxygram/
+                            sudo chmod -R 777 /var/www/html/Proxygram/
+                            mv /var/www/html/kaspernux.install /var/www/html/Proxygram/install/kaspernux.install
                             sleep 2
                             
-                            content=$(cat /home/grambot/web/tg.proxygram.io/public_html/Proxygram/install/kaspernux.install)
+                            content=$(cat /var/www/html/Proxygram/install/kaspernux.install)
                             token=$(echo "$content" | jq -r '.token')
                             dev=$(echo "$content" | jq -r '.dev')
                             domain=$(echo "$content" | jq -r '.main_domin')
@@ -76,8 +76,8 @@ do
                             db_username=$(echo "$content" | jq -r '.db_username')
                             db_password=$(echo "$content" | jq -r '.db_password')
 
-                            source_file="/home/grambot/web/tg.proxygram.io/public_html/Proxygram/config.php"
-                            destination_file="/home/grambot/web/tg.proxygram.io/public_html/Proxygram/config.php.tmp"
+                            source_file="/var/www/html/Proxygram/config.php"
+                            destination_file="/var/www/html/Proxygram/config.php.tmp"
                             replace=$(cat "$source_file" | sed -e "s/\[\*TOKEN\*\]/${token}/g" -e "s/\[\*DEV\*\]/${dev}/g" -e "s/\[\*DB-NAME\*\]/${db_name}/g" -e "s/\[\*DB-USER\*\]/${db_username}/g" -e "s/\[\*DB-PASS\*\]/${db_password}/g")
                             echo "$replace" > "$destination_file"
                             mv "$destination_file" "$source_file"
@@ -132,9 +132,9 @@ do
             echo -e "\n"
             read -p "Вы уверены, что хотите удалить? [y/n] : " answer
             if [ "$answer" != "${answer#[Yy]}" ]; then
-                if [ -d "/home/grambot/web/tg.proxygram.io/public_html/Proxygram" ]; then
+                if [ -d "/var/www/html/Proxygram" ]; then
                     colorized_echo green "\n[+] Пожалуйста, подождите, удаление. . .\n"
-                    rm -r /home/grambot/web/tg.proxygram.io/public_html/Proxygram/
+                    rm -r /var/www/html/Proxygram/
 
                     sleep 2
 
